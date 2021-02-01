@@ -1,11 +1,11 @@
 // Confidential Data for firebase connection
 var firebaseConfig = {
-    apiKey: "AI*******************************5M",
-    authDomain: "********************.firebaseapp.com",
-    projectId: "t*******************n",
-    storageBucket: "*********************.appspot.com",
-    messagingSenderId: "3******************",
-    appId: "*:************************************"
+    apiKey: "AIzaSyD3xxiki*****************_LLpz4Uzh2Wkp5M",
+    authDomain: "taskmanager****************ebaseapp.com",
+    projectId: "taskmana****************",
+    storageBucket: "taskmanage*************t.com",
+    messagingSenderId: "3*************4",
+    appId: "1:38581459976***************fffcc6f186f35c1"
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -16,14 +16,21 @@ firebase.initializeApp(firebaseConfig);
 // Listening to load event on window
 // Reading the number of tasks stored in the database
 var totalItems;
+var maxCode;
 var code;
 window.addEventListener("load",function(){
     console.log("Complete Window LOADED");
     firebase.database().ref('TotalTasks').on('value', function(snapshot){
         totalItems = snapshot.val().totalItems;
+        maxCode = snapshot.val().maxCode;
         console.log("The total Items are : " + totalItems);
         if(totalItems > 0 && document.getElementById("info") != null){
             document.getElementById("info").remove();
+        }
+        if(totalItems === 0){
+            firebase.database().ref('TotalTasks').update({
+                maxCode : 0
+            })
         }
     });
     
@@ -146,7 +153,8 @@ function deleteData(code){
 
 // function invoked by add btn
 // function to store the task entered by the user in the database
-// read and clear the fields -> store the task in DB with a unique code -> update the total tasks in DB -> show the task under taskbar in form of a card
+// read and clear the fields->store the task in DB with a unique code->update the total tasks in DB->
+// show the task under taskbar in form of a card
 function storeTask(event){
     event.preventDefault();
 
@@ -159,6 +167,9 @@ function storeTask(event){
 
 
     code = totalItems;
+    if(totalItems < maxCode){
+        code = maxCode + 1;
+    }
     // Store data in firebase
     firebase.database().ref('TaskList/'+code).set({
         task : task,
@@ -168,8 +179,13 @@ function storeTask(event){
 
     // Update number of tasks in database
     firebase.database().ref('TotalTasks').update({
-        totalItems : totalItems+1
+        totalItems : totalItems+1,
+        maxCode : maxCode+1
     });
+
+    if(document.getElementById("info") !== null){
+        document.getElementById("info").remove();
+    }
 
     // Show the data in the body in form of card
     document.getElementById("tasks-header").insertAdjacentHTML("afterend", `<div class="Task-item" id="${code}">
@@ -182,7 +198,8 @@ function storeTask(event){
     <hr>
     <div class="buttons">
         <button class="button edit" id="editbtn" onclick = "editData('${code}')"><i class="fas fa-edit"></i> EDIT TASK</button>
-        <button class="button delete" id="deletebtn" onclick = "deleteData('${code}')"><i class="fas fa-trash-alt"></i> DELETE TASK</button>
+        <button class="button delete" id="deletebtn" onclick = "deleteData('${code}')">
+        <i class="fas fa-trash-alt"></i>DELETE TASK</button>
     </div>
     
     </div>`);
@@ -192,8 +209,10 @@ function storeTask(event){
 var data;
 firebase.database().ref('TaskList').on('value', function(snapshot){
     data = snapshot.val();
+    console.log("This is data speaking from open");
     console.log(data);
 });
+
 
 // function invoked by show all btn
 // if no tasks available then display "No pending tasks"
@@ -201,6 +220,8 @@ firebase.database().ref('TaskList').on('value', function(snapshot){
 // read the data from the DB and display in form of cards 
 // adjust the color and disabled attribute of the buttons based on whether the task is completed or not 
 function showAll(){
+    console.log("This is data speaking from within showAll()");
+    console.log(data);
     if(data === null && document.getElementById("info") == null){
         document.getElementById("tasks-header").insertAdjacentHTML("afterend", 
         `<div class="no-task-info" id = "info">
@@ -277,7 +298,7 @@ function showAll(){
 // If yes then clear the database and delete all the tasks from the page.
 function deleteAll(){
     var option = false;
-    if(totalItems === 0  &&  document.getElementById("info") == null){
+    if(totalItems === 0  &&  document.getElementById("info") === null){
         document.getElementById("tasks-header").insertAdjacentHTML("afterend", 
         `<div class="no-task-info" id = "info">
             <i class="fas fa-info-circle"></i>
@@ -285,7 +306,7 @@ function deleteAll(){
         </div>`
         )
     }
-    else{
+    if(totalItems !== 0){
         option = confirm("The tasks will be permanently deleted. Do you want to continue?");
         if(option === true){
             firebase.database().ref('TaskList').remove();
@@ -293,18 +314,16 @@ function deleteAll(){
                 element.remove();
             });
             firebase.database().ref('TotalTasks').update({
-                totalItems : 0
+                totalItems : 0,
+                maxCode : 0
             });
+            document.getElementById("tasks-header").insertAdjacentHTML("afterend", 
+            `<div class="no-task-info" id = "info">
+                <i class="fas fa-info-circle"></i>
+                All items deleted
+            </div>`
+            )
         } 
     }
-    if(document.getElementById("info") == null && option === true){
-        document.getElementById("tasks-header").insertAdjacentHTML("afterend", 
-        `<div class="no-task-info" id = "info">
-            <i class="fas fa-info-circle"></i>
-            All items deleted
-        </div>`
-        )
-    }
-    
 }
 

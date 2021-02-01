@@ -40,9 +40,7 @@
                 </div>
                 <div id = "form-btns">
                     <button type="submit" class="button add" id = "addTask" >󠀫󠀫<i class="fas fa-plus"></i> ADD TASK</button>
-                </div>
-            
-                
+                </div>    
             </form>
         </div>
     
@@ -52,6 +50,7 @@
                 <button class="button showAll" id="showALL" onclick = "showAll()">SHOW ALL</button>
                 <button class="button deleteAll" id="deleteALL" onclick = "deleteAll()">DELETE ALL</button>
             </div>
+        </div>
     </div>
     
     
@@ -67,10 +66,6 @@
 
 
     <script>
-        function changeColor(idname){
-            console.log(idname);
-            idname.style.color = "rgb(75, 192, 231)";
-        }
         document.getElementById("task").addEventListener("focusin",function(){
             document.getElementById("tasklabel").style.color = " rgb(61, 198, 243)";
         });
